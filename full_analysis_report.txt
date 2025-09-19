@@ -1,0 +1,65 @@
+================================================================================
+ENHANCED VISUAL ANALYSIS REPORT
+================================================================================
+Timestamp: 2025-09-19T19:08:38.936798
+Processing Time: 1.58 seconds
+
+VISUAL ANALYSIS RESULTS
+----------------------------------------
+
+INITIAL INGESTION & HIGH-LEVEL TRIAGE
+16:9 aspect ratio architectural. Chaotic mood.
+
+COMPOSITIONAL & STRUCTURAL ANALYSIS
+Composition follows rule of thirds. Primary focal point in the upper-right region Strong depth separation with bright background, sharp midground, shadowed foreground Negative space provides balance.
+
+SHAPE & FORM DECONSTRUCTION
+Geometric shapes include simple geometric forms Organic shapes with moderately curved, irregular organic forms, artificial coloring, angular transitions
+
+COLOR PALETTE & LIGHTING ANALYSIS
+Color palette dominated by white, white, white. Lighting: moderate contrast ambient light from from above.
+
+TEXTURE & MATERIAL DEFINITION
+Textures: moderately textured, highly detailed areas, varied surface qualities, minimal surface detail. Patterns: horizontal striping, vertical striping, regular horizontal spacing, regular vertical spacing
+
+========================================
+PROGRESSIVE PROMPTS
+========================================
+
+Level 1 (Core Concept):
+A photograph of architectural elements in a dynamic environment
+
+Level 2 (Detailed Composition):
+A photograph of architectural elements in a dynamic environment, rule of thirds, primary focal point in the upper-right region strong depth separation with bright background, sharp midground, shadowed foreground negative space provides balance.
+
+Level 3 (Artistic & Atmospheric):
+A photograph of architectural elements in a dynamic environment, rule of thirds, primary focal point in the upper-right region strong depth separation with bright background, sharp midground, shadowed foreground negative space provides balance.. Lighting: moderate contrast ambient light from from above.. Color palette dominated by white, white, white, creating a chaotic mood
+
+Level 4 (Master Blueprint):
+A photograph of architectural elements in a dynamic environment, rule of thirds, primary focal point in the upper-right region strong depth separation with bright background, sharp midground, shadowed foreground negative space provides balance.. Lighting: moderate contrast ambient light from from above.. Color palette dominated by white, white, white, creating a chaotic mood. moderately textured, highly detailed areas, varied surface qualities, minimal surface detail, patterns: horizontal striping, vertical striping, regular horizontal spacing, regular vertical spacing. Geometric shapes include simple geometric forms Organic shapes with moderately curved, irregular organic forms, artificial coloring, angular transitions. Shot with sharp focus, high dynamic range, professional lighting
+
+========================================
+ASCII ART CONVERSION
+========================================
+Quality Level: high
+Output Size: (120, 33)
+Character Count: 3992
+Line Count: 33
+
+ASCII Art Preview (first 10 lines):
+----------------------------------------
+]]]]][[]--___+~~~<<>>ii>>!!?[[1tvJQQLLQQ000000000OOQXj)}(fxx)]||}][}{{1)||\\/frxnnnjjjt/\||\tjrv)_++rmQX0OOOOOOOOOQCLLQL
+]]][[[[]__-----__+___+_--+_fznfttfvJ0OO0QQQQ0000000OOOQzt{{))(txr|}][{)1|))|(())(|\\\/fxcUCQ0OOmx__+)L0ZOOOOO0OOLUUC00OO
+]]][[[[[?--____-___--_-][]}xJZZ0Cnt\/rcC0ZZOQQQQ000000OZOCut{})jxnun/[+<-]|)|||/jnvcYJLOZZOO0OOZ0\+-)CO0OOOOOOOYC0OOOO0O
+]][[[[[[?-____-____----?[[1vLO00ZmmOJn\(|jcCOmmO00Q000000QL0Jvj\(ft)-_[)1)\\tjrrrncYJ0000OOOm0LXv1+-{XO0OOOOOZzJZOOOOOZO
+]]]][[[]++~~+++++__?]]--?]1z0ZO00LCUYcnj\1[[}|nUQOZZO0000QCQQOZc[+--|vYXuj\\/tfjjrxxcccccccvv)}~~][__\OZOOO00nu0QLCCUXJC
+]]]][[[?~~~~~i<+++_-_----?{XzvXXYcx/(){[[[[[[[[[|txzJ0ZOQCYJz/{{tzXf)(/\||1{}}}{{1{}{{1)))(()\frcLX?<\JXXXzYLC00QCJCCCJJ
+??]]]]]-<~~<<<~~~~~__++_?-{U(+[{[?--[{(tjncYJLQQQLJvnjjvXz||11vUJJt{1}[}[_]1(|1}}}{))11)|\/jxvzUJUYXcJQCQQ0Uxxft\(){[]-_
+]]]]]]]_<~~~<<~~~~~++++_--}Y1<++<>i~~_?{tzXYXYzunj|1({]_-{((tzCCCCJvcYLQ0Uvnuut{]??1\||(tfruzUCLQ0OOZZOOOOmc/ttttt/\/ttf
+]]]]]]]+<<~<<<<<~<~+_+++__}Xxfjxj)xf{jt[|t}+i>+~]{{(ftffrnnxttxvXJ0mOQQL0OJf?[{)ff|11)\trtfjrxnvzccL00O000QQQLJYYzvvYzvn
+]]]]]]]~i~~<<<<<<<~+__+~++}zvxxjt\j/))\rnf\][?+-(jxxUJCLQ0Q000CXx|1|jvzu\1|xY0OUxtt//nnnuXYUJCQ0Xccxrjfftt\\())1[[__[>:>
+... (truncated)
+
+================================================================================
+END OF REPORT
+================================================================================
