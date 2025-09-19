@@ -247,7 +247,7 @@ class VisualAnalysisAgent:
         lighting_info = step4_parts[1] if len(step4_parts) > 1 else "with ambient lighting"
         
         mood = self._assess_initial_mood().lower()
-        level3 = f"{level2}. {lighting_info} {color_info}, creating a {mood} mood"
+        level3 = f"{level2}. {lighting_info}. {color_info}, creating a {mood} mood"
         
         # Level 4: Master Blueprint - [L3 Prompt] + [Textural Details] + [Shape Language] + [Advanced Modifiers]
         texture_info = step5.output.replace("Textures: ", "").replace(". Patterns: ", ", patterns: ")
@@ -459,20 +459,249 @@ class VisualAnalysisAgent:
         return "Distributed focal points throughout the composition"
     
     def _analyze_depth_layers(self) -> str:
-        """Analyze foreground, midground, background (simplified)"""
-        return "Clear depth with foreground, midground, and background elements."
+        """Analyze foreground, midground, background using blur and focus analysis"""
+        if not self.current_image:
+            return "Clear depth with foreground, midground, and background elements."
+            
+        # Convert to grayscale for depth analysis
+        gray_image = self.current_image.convert('L')
+        img_array = np.array(gray_image)
+        height, width = img_array.shape
+        
+        # Divide image into horizontal bands to analyze depth
+        # Typically: top = background, middle = midground, bottom = foreground
+        top_third = img_array[:height//3, :]
+        middle_third = img_array[height//3:2*height//3, :]
+        bottom_third = img_array[2*height//3:, :]
+        
+        layers = []
+        
+        try:
+            # Analyze sharpness/detail in each layer using local variance
+            def calculate_sharpness(region):
+                if region.size == 0:
+                    return 0
+                # Use Laplacian-like operator for sharpness
+                kernel = np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])
+                # Simple convolution approximation
+                edges = np.abs(np.gradient(region.flatten())).mean()
+                return edges
+            
+            top_sharpness = calculate_sharpness(top_third)
+            middle_sharpness = calculate_sharpness(middle_third)
+            bottom_sharpness = calculate_sharpness(bottom_third)
+            
+            # Analyze brightness (often background is brighter/hazier)
+            top_brightness = np.mean(top_third)
+            middle_brightness = np.mean(middle_third)
+            bottom_brightness = np.mean(bottom_third)
+            
+            # Determine layer characteristics
+            sharpness_values = [top_sharpness, middle_sharpness, bottom_sharpness]
+            max_sharpness = max(sharpness_values)
+            
+            # Background analysis (top third)
+            if top_brightness > middle_brightness + 10:
+                layers.append("bright background")
+            elif top_sharpness < max_sharpness * 0.7:
+                layers.append("soft background")
+            else:
+                layers.append("detailed background")
+            
+            # Midground analysis (middle third)
+            if middle_sharpness > max_sharpness * 0.8:
+                layers.append("sharp midground")
+            else:
+                layers.append("transitional midground")
+            
+            # Foreground analysis (bottom third)
+            if bottom_sharpness == max_sharpness:
+                layers.append("prominent foreground")
+            elif bottom_brightness < middle_brightness - 10:
+                layers.append("shadowed foreground")
+            else:
+                layers.append("clear foreground")
+                
+            # Analyze depth separation
+            brightness_range = max(top_brightness, middle_brightness, bottom_brightness) - min(top_brightness, middle_brightness, bottom_brightness)
+            if brightness_range > 50:
+                depth_quality = "Strong depth separation"
+            elif brightness_range > 20:
+                depth_quality = "Moderate depth separation"
+            else:
+                depth_quality = "Subtle depth layers"
+                
+        except Exception:
+            # Fallback analysis
+            layers = ["background elements", "midground features", "foreground subjects"]
+            depth_quality = "Clear depth"
+        
+        return f"{depth_quality} with {', '.join(layers)}"
     
     def _analyze_negative_space(self) -> str:
         """Analyze negative space usage (simplified)"""
         return "Negative space provides balance."
     
     def _analyze_geometric_shapes(self) -> str:
-        """Analyze geometric shapes (simplified)"""
-        return "Geometric elements include rectangular and circular forms."
+        """Analyze geometric shapes using edge detection and contour analysis"""
+        if not self.current_image:
+            return "Geometric elements include rectangular and circular forms"
+            
+        # Convert to grayscale for shape analysis
+        gray_image = self.current_image.convert('L')
+        img_array = np.array(gray_image)
+        
+        shapes_found = []
+        
+        # Simple edge detection using gradients
+        try:
+            gradient_x = np.gradient(img_array, axis=1)
+            gradient_y = np.gradient(img_array, axis=0)
+            edge_magnitude = np.sqrt(gradient_x**2 + gradient_y**2)
+            
+            # Threshold to find strong edges
+            edge_threshold = np.mean(edge_magnitude) + 2 * np.std(edge_magnitude)
+            strong_edges = edge_magnitude > edge_threshold
+            
+            # Count edge density to infer shape complexity
+            edge_density = np.sum(strong_edges) / strong_edges.size
+            
+            if edge_density > 0.1:
+                shapes_found.append("complex geometric forms")
+            elif edge_density > 0.05:
+                shapes_found.append("moderate geometric detail")
+            else:
+                shapes_found.append("simple geometric forms")
+                
+            # Analyze edge patterns to infer shape types
+            # Look for straight lines (rectangular shapes)
+            horizontal_edges = np.sum(strong_edges, axis=1)
+            vertical_edges = np.sum(strong_edges, axis=0)
+            
+            # If we have strong horizontal or vertical lines, likely rectangular
+            if np.max(horizontal_edges) > len(horizontal_edges) * 0.3 or np.max(vertical_edges) > len(vertical_edges) * 0.3:
+                shapes_found.append("rectangular elements")
+            
+            # Check for circular patterns by looking at edge distribution
+            height, width = img_array.shape
+            center_y, center_x = height // 2, width // 2
+            
+            # Sample points in a circular pattern and check for edges
+            circular_edge_count = 0
+            total_samples = 0
+            
+            for angle in range(0, 360, 30):  # Sample every 30 degrees
+                for radius in [min(height, width) // 6, min(height, width) // 4]:
+                    x = int(center_x + radius * np.cos(np.radians(angle)))
+                    y = int(center_y + radius * np.sin(np.radians(angle)))
+                    
+                    if 0 <= x < width and 0 <= y < height:
+                        if strong_edges[y, x]:
+                            circular_edge_count += 1
+                        total_samples += 1
+            
+            if total_samples > 0 and circular_edge_count / total_samples > 0.3:
+                shapes_found.append("circular elements")
+                
+        except Exception:
+            # Fallback to basic classification
+            shapes_found = ["geometric elements"]
+        
+        # Analyze aspect ratio for additional shape hints
+        width, height = self.current_image.size
+        aspect_ratio = width / height
+        
+        if abs(aspect_ratio - 1.0) < 0.1:
+            shapes_found.append("square proportions")
+        elif aspect_ratio > 2.0:
+            shapes_found.append("elongated horizontal forms")
+        elif aspect_ratio < 0.5:
+            shapes_found.append("elongated vertical forms")
+        
+        return "Geometric shapes include " + ", ".join(shapes_found) if shapes_found else "Basic geometric forms present"
     
     def _analyze_organic_shapes(self) -> str:
-        """Analyze organic shapes (simplified)"""
-        return "Organic shapes with natural, flowing lines."
+        """Analyze organic shapes using curvature and complexity analysis"""
+        if not self.current_image:
+            return "Organic shapes with natural, flowing lines"
+            
+        # Convert to grayscale for organic shape analysis
+        gray_image = self.current_image.convert('L')
+        img_array = np.array(gray_image)
+        
+        organic_qualities = []
+        
+        try:
+            # Calculate curvature using second derivatives
+            gradient_x = np.gradient(img_array, axis=1)
+            gradient_y = np.gradient(img_array, axis=0)
+            
+            # Second derivatives for curvature
+            grad_xx = np.gradient(gradient_x, axis=1)
+            grad_yy = np.gradient(gradient_y, axis=0)
+            grad_xy = np.gradient(gradient_x, axis=0)
+            
+            # Curvature measure (simplified)
+            curvature = np.sqrt(grad_xx**2 + grad_yy**2 + 2*grad_xy**2)
+            avg_curvature = np.mean(curvature)
+            curvature_variance = np.var(curvature)
+            
+            # Classify based on curvature characteristics
+            if avg_curvature > 5:
+                organic_qualities.append("highly curved")
+            elif avg_curvature > 2:
+                organic_qualities.append("moderately curved")
+            else:
+                organic_qualities.append("gently curved")
+                
+            if curvature_variance > 25:
+                organic_qualities.append("irregular organic forms")
+            elif curvature_variance > 10:
+                organic_qualities.append("varied organic shapes")
+            else:
+                organic_qualities.append("smooth organic shapes")
+                
+        except Exception:
+            # Fallback analysis
+            organic_qualities.append("natural forms")
+        
+        # Analyze color distribution to infer natural vs artificial
+        try:
+            color_palette = self._extract_color_palette()
+            natural_colors = ['green', 'brown', 'blue', 'gray', 'lightblue']
+            color_names = [color[0] for color in color_palette.dominant_colors[:3]]
+            
+            natural_color_count = sum(1 for color in color_names if color in natural_colors)
+            
+            if natural_color_count >= 2:
+                organic_qualities.append("natural coloring")
+            else:
+                organic_qualities.append("artificial coloring")
+                
+        except Exception:
+            pass
+        
+        # Analyze edge smoothness
+        try:
+            # Calculate edge gradient smoothness
+            gradient_magnitude = np.sqrt(gradient_x**2 + gradient_y**2)
+            gradient_changes = np.abs(np.gradient(gradient_magnitude.flatten()))
+            smoothness = 1.0 / (1.0 + np.mean(gradient_changes))
+            
+            if smoothness > 0.8:
+                organic_qualities.append("flowing lines")
+            elif smoothness > 0.5:
+                organic_qualities.append("moderately flowing contours")
+            else:
+                organic_qualities.append("angular transitions")
+                
+        except Exception:
+            organic_qualities.append("natural transitions")
+        
+        if not organic_qualities:
+            return "Natural organic forms present"
+        else:
+            return "Organic shapes with " + ", ".join(organic_qualities)
     
     def _extract_color_palette(self) -> ColorPalette:
         """Extract dominant colors from the image with improved analysis"""
@@ -711,12 +940,168 @@ class VisualAnalysisAgent:
         )
     
     def _analyze_textures(self) -> str:
-        """Analyze surface textures (simplified)"""
-        return "smooth and varied surface textures"
+        """Analyze surface textures using image processing techniques"""
+        if not self.current_image:
+            return "smooth and varied surface textures"
+            
+        # Convert to grayscale for texture analysis
+        gray_image = self.current_image.convert('L')
+        img_array = np.array(gray_image)
+        
+        # Calculate local variance as a texture measure
+        # High variance indicates rough/textured areas, low variance indicates smooth areas
+        
+        # Use a sliding window to calculate local variance
+        height, width = img_array.shape
+        window_size = min(20, height//10, width//10)  # Adaptive window size
+        
+        if window_size < 3:
+            return "uniform surface texture"
+        
+        variances = []
+        for y in range(0, height - window_size, window_size):
+            for x in range(0, width - window_size, window_size):
+                window = img_array[y:y+window_size, x:x+window_size]
+                var = np.var(window)
+                variances.append(var)
+        
+        if not variances:
+            return "uniform surface texture"
+            
+        avg_variance = np.mean(variances)
+        max_variance = max(variances)
+        variance_std = np.std(variances)
+        
+        # Classify texture based on variance measures
+        textures = []
+        
+        if avg_variance < 100:
+            textures.append("smooth")
+        elif avg_variance < 500:
+            textures.append("moderately textured")
+        else:
+            textures.append("rough")
+            
+        if max_variance > 2000:
+            textures.append("highly detailed areas")
+        
+        if variance_std > 300:
+            textures.append("varied surface qualities")
+        else:
+            textures.append("consistent texture")
+            
+        # Analyze edge density for additional texture description
+        try:
+            # Simple edge detection using gradient
+            gradient_x = np.gradient(img_array, axis=1)
+            gradient_y = np.gradient(img_array, axis=0)
+            edge_magnitude = np.sqrt(gradient_x**2 + gradient_y**2)
+            edge_density = np.mean(edge_magnitude)
+            
+            if edge_density > 15:
+                textures.append("intricate surface details")
+            elif edge_density > 8:
+                textures.append("moderate surface detail")
+            else:
+                textures.append("minimal surface detail")
+                
+        except:
+            # Fallback if gradient calculation fails
+            pass
+        
+        return ", ".join(textures)
     
     def _identify_patterns(self) -> str:
-        """Identify repeating patterns (simplified)"""
-        return "no obvious repeating patterns"
+        """Identify repeating patterns using frequency analysis"""
+        if not self.current_image:
+            return "no obvious repeating patterns"
+            
+        # Convert to grayscale for pattern analysis
+        gray_image = self.current_image.convert('L')
+        img_array = np.array(gray_image)
+        height, width = img_array.shape
+        
+        patterns_found = []
+        
+        # Check for horizontal patterns (like stripes)
+        horizontal_diffs = []
+        for y in range(height):
+            row = img_array[y, :]
+            # Calculate differences between adjacent pixels
+            diffs = np.abs(np.diff(row))
+            horizontal_diffs.extend(diffs)
+        
+        horizontal_pattern_strength = np.var(horizontal_diffs)
+        
+        # Check for vertical patterns
+        vertical_diffs = []
+        for x in range(width):
+            col = img_array[:, x]
+            diffs = np.abs(np.diff(col))
+            vertical_diffs.extend(diffs)
+        
+        vertical_pattern_strength = np.var(vertical_diffs)
+        
+        # Analyze pattern strength
+        if horizontal_pattern_strength > 1000:
+            patterns_found.append("horizontal striping")
+        if vertical_pattern_strength > 1000:
+            patterns_found.append("vertical striping")
+        
+        # Check for regular texture patterns using autocorrelation-like measure
+        # Sample small regions and look for repetition
+        sample_size = min(32, height//4, width//4)
+        if sample_size > 8:
+            try:
+                # Take samples from different parts of the image
+                top_left = img_array[:sample_size, :sample_size]
+                top_right = img_array[:sample_size, -sample_size:]
+                bottom_left = img_array[-sample_size:, :sample_size]
+                bottom_right = img_array[-sample_size:, -sample_size:]
+                
+                samples = [top_left, top_right, bottom_left, bottom_right]
+                correlations = []
+                
+                for i in range(len(samples)):
+                    for j in range(i+1, len(samples)):
+                        if samples[i].shape == samples[j].shape:
+                            corr = np.corrcoef(samples[i].flatten(), samples[j].flatten())[0, 1]
+                            if not np.isnan(corr):
+                                correlations.append(abs(corr))
+                
+                if correlations and np.mean(correlations) > 0.7:
+                    patterns_found.append("repeating texture elements")
+                elif correlations and np.mean(correlations) > 0.4:
+                    patterns_found.append("subtle pattern repetition")
+                    
+            except:
+                # Skip pattern analysis if it fails
+                pass
+        
+        # Check for grid-like patterns by analyzing regular spacing
+        try:
+            # Look for regular intensity changes that might indicate grids
+            row_means = np.mean(img_array, axis=1)
+            col_means = np.mean(img_array, axis=0)
+            
+            # Simple frequency analysis
+            row_fft = np.abs(np.fft.fft(row_means))
+            col_fft = np.abs(np.fft.fft(col_means))
+            
+            # Check if there are strong frequency components (indicating regularity)
+            if len(row_fft) > 10 and np.max(row_fft[2:len(row_fft)//2]) > 3 * np.mean(row_fft[2:len(row_fft)//2]):
+                patterns_found.append("regular horizontal spacing")
+            if len(col_fft) > 10 and np.max(col_fft[2:len(col_fft)//2]) > 3 * np.mean(col_fft[2:len(col_fft)//2]):
+                patterns_found.append("regular vertical spacing")
+                
+        except:
+            # Skip if FFT analysis fails
+            pass
+        
+        if not patterns_found:
+            return "no obvious repeating patterns"
+        else:
+            return ", ".join(patterns_found)
     
     def _generate_level1_prompt(self) -> str:
         """Generate Level 1 core concept prompt following specification formula: [Style] of [Primary Subject] in a [Setting]"""
