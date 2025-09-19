@@ -21,8 +21,8 @@ def test_ascii_converter():
     draw.rectangle([50, 25, 150, 75], fill='black')
     test_image.save('/tmp/test_rect.png')
     
-    # Test different quality levels
-    qualities = ['low', 'medium', 'high', 'ultra']
+    # Test different quality levels including 4K
+    qualities = ['low', 'medium', 'high', 'ultra', '4k']
     
     for quality in qualities:
         try:
@@ -34,6 +34,15 @@ def test_ascii_converter():
             print(f"✓ {quality.capitalize()} quality ASCII conversion successful")
             print(f"  - Output size: {result['conversion_info']['output_size']}")
             print(f"  - Character count: {result['character_count']}")
+            
+            # Special validation for 4K quality
+            if quality == '4k':
+                width, height = result['conversion_info']['output_size']
+                if width >= 300 and result['character_count'] > 15000:
+                    print(f"  - ✓ 4K quality verified: {width}x{height} characters")
+                else:
+                    print(f"  - ❌ 4K quality validation failed")
+                    
         except Exception as e:
             print(f"❌ {quality.capitalize()} quality ASCII conversion failed: {e}")
     

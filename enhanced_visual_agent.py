@@ -45,7 +45,7 @@ class EnhancedVisualAnalysisAgent(VisualAnalysisAgent):
         
         Args:
             enable_ascii: Whether to enable ASCII art conversion
-            ascii_quality: Quality level for ASCII conversion ('low', 'medium', 'high', 'ultra')
+            ascii_quality: Quality level for ASCII conversion ('low', 'medium', 'high', 'ultra', '4k')
         """
         super().__init__()
         self.enable_ascii = enable_ascii

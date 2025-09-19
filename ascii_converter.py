@@ -24,7 +24,8 @@ class ASCIIConverter:
         'simple': " .:-=+*#%@",
         'extended': " .`',:;\"^~-_+<>i!lI?/\\|()1{}[]rcvunxzjftLCJUYXZO0Qoahkbdpqwm*WMB8&%$#@",
         'blocks': " ░▒▓█",
-        'detailed': " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
+        'detailed': " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
+        'ultra_dense': " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$ÄÖÜäöüß▀▄█▌▐░▒▓"
     }
     
     def __init__(self, char_set: str = 'extended', width: int = 120, 
@@ -57,17 +58,39 @@ class ASCIIConverter:
         # Convert to grayscale
         gray_img = image.convert('L')
         
-        # Enhance contrast if enabled
-        if self.enhance_contrast:
-            enhancer = ImageEnhance.Contrast(gray_img)
-            gray_img = enhancer.enhance(1.5)  # Increase contrast by 50%
-        
-        # Apply edge detection for better detail preservation
-        if self.edge_detection:
-            # Create edge-enhanced version
-            edges = gray_img.filter(ImageFilter.FIND_EDGES)
-            # Blend original with edges for better detail
-            gray_img = Image.blend(gray_img, edges, 0.3)
+        # Enhanced preprocessing for 4K resolution
+        if self.width >= 300:  # 4K level processing
+            # More aggressive contrast enhancement for fine details
+            if self.enhance_contrast:
+                enhancer = ImageEnhance.Contrast(gray_img)
+                gray_img = enhancer.enhance(1.8)  # Stronger contrast for 4K
+            
+            # Enhanced sharpness for 4K
+            enhancer = ImageEnhance.Sharpness(gray_img)
+            gray_img = enhancer.enhance(1.5)
+            
+            # More sophisticated edge detection for 4K
+            if self.edge_detection:
+                edges = gray_img.filter(ImageFilter.FIND_EDGES)
+                # Higher edge blend for better detail preservation
+                gray_img = Image.blend(gray_img, edges, 0.4)
+                
+            # Additional detail enhancement filter
+            gray_img = gray_img.filter(ImageFilter.DETAIL)
+            
+        else:
+            # Standard processing for lower resolutions
+            # Enhance contrast if enabled
+            if self.enhance_contrast:
+                enhancer = ImageEnhance.Contrast(gray_img)
+                gray_img = enhancer.enhance(1.5)  # Increase contrast by 50%
+            
+            # Apply edge detection for better detail preservation
+            if self.edge_detection:
+                # Create edge-enhanced version
+                edges = gray_img.filter(ImageFilter.FIND_EDGES)
+                # Blend original with edges for better detail
+                gray_img = Image.blend(gray_img, edges, 0.3)
         
         # Apply subtle sharpening
         gray_img = gray_img.filter(ImageFilter.SHARPEN)
@@ -88,7 +111,12 @@ class ASCIIConverter:
         aspect_ratio = orig_height / orig_width
         
         # Account for character aspect ratio (characters are taller than wide)
-        char_aspect_ratio = 0.5  # Typical character height/width ratio
+        # For 4K resolution, use more refined aspect ratio calculation
+        if self.width >= 300:  # 4K level
+            char_aspect_ratio = 0.45  # Tighter for high-res displays
+        else:
+            char_aspect_ratio = 0.5  # Typical character height/width ratio
+            
         adjusted_height = int(self.width * aspect_ratio * char_aspect_ratio)
         
         return self.width, adjusted_height
@@ -222,7 +250,7 @@ def create_enhanced_ascii_converter(image_path: str, output_path: str, quality: 
     Args:
         image_path: Path to input image
         output_path: Path to save ASCII output
-        quality: Quality level ('low', 'medium', 'high', 'ultra')
+        quality: Quality level ('low', 'medium', 'high', 'ultra', '4k')
         
     Returns:
         Dictionary with conversion results and metadata
@@ -250,6 +278,12 @@ def create_enhanced_ascii_converter(image_path: str, output_path: str, quality: 
         'ultra': {
             'char_set': 'detailed',
             'width': 160,
+            'enhance_contrast': True,
+            'edge_detection': True
+        },
+        '4k': {
+            'char_set': 'ultra_dense',
+            'width': 320,
             'enhance_contrast': True,
             'edge_detection': True
         }
@@ -287,6 +321,7 @@ Examples:
     python ascii_converter.py image.jpg                     # Basic conversion
     python ascii_converter.py image.jpg -o ascii_art.txt    # Save to file
     python ascii_converter.py image.jpg -q ultra -w 200     # Ultra quality
+    python ascii_converter.py image.jpg -q 4k               # 4K resolution ASCII
     python ascii_converter.py image.jpg -c blocks           # Use block characters
         """
     )
@@ -295,9 +330,9 @@ Examples:
     parser.add_argument('-o', '--output', help='Output ASCII art file path')
     parser.add_argument('-w', '--width', type=int, default=120, 
                        help='Output width in characters (default: 120)')
-    parser.add_argument('-q', '--quality', choices=['low', 'medium', 'high', 'ultra'],
+    parser.add_argument('-q', '--quality', choices=['low', 'medium', 'high', 'ultra', '4k'],
                        default='high', help='Quality preset (default: high)')
-    parser.add_argument('-c', '--charset', choices=['simple', 'extended', 'blocks', 'detailed'],
+    parser.add_argument('-c', '--charset', choices=['simple', 'extended', 'blocks', 'detailed', 'ultra_dense'],
                        default='detailed', help='Character set to use (default: detailed)')
     parser.add_argument('--no-contrast', action='store_true', 
                        help='Disable contrast enhancement')
@@ -310,7 +345,7 @@ Examples:
     
     try:
         # Create converter with custom settings if provided
-        if args.quality in ['low', 'medium', 'high', 'ultra']:
+        if args.quality in ['low', 'medium', 'high', 'ultra', '4k']:
             result = create_enhanced_ascii_converter(
                 args.input, 
                 args.output or 'ascii_output.txt', 
