@@ -68,3 +68,9 @@ Thumbs.db
 /tmp/
 *.tmp
 *.temp
+
+# ASCII output files (except sample outputs)
+demo_*.txt
+comparison_*.txt
+test_*.txt
+ascii_4k.txt
