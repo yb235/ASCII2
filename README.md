@@ -1,6 +1,6 @@
 # Visual Analysis Agent
 
-A comprehensive visual analysis system that implements the **Visual Deconstruction & Prompt Synthesis** agent as specified in `agent.md`.
+A comprehensive visual analysis system that implements the **Visual Deconstruction & Prompt Synthesis** agent as specified in [`archive/docs/agent.md`](archive/docs/agent.md).
 
 ## Overview
 
@@ -184,7 +184,7 @@ sharp focus, high dynamic range, professional lighting
 
 ## Architecture
 
-The implementation follows the exact specification from `agent.md`:
+The implementation follows the exact specification from [`archive/docs/agent.md`](archive/docs/agent.md):
 
 ```
 Image Input → 5-Step Analysis → Progressive Prompts
@@ -193,6 +193,26 @@ Image Input → 5-Step Analysis → Progressive Prompts
 ```
 
 Each step builds upon the previous one to create a comprehensive visual profile suitable for AI image generation systems.
+
+## Repository Structure
+
+The repository has been organized for clarity and maintainability:
+
+### Core Files (Root Directory)
+- `visual_analysis_agent.py` - Main implementation of the Visual Analysis Agent
+- `cli.py` - Command line interface for the agent
+- `demo.py` - Demo script with sample image generation
+- `requirements.txt` - Python dependencies
+- `README.md` - This documentation
+
+### Archive Directory
+Additional files have been organized in the [`archive/`](archive/) directory:
+- **Documentation**: Original specification and implementation notes
+- **Tests**: Unit tests and test files  
+- **Examples**: Enhanced implementations and utilities (ASCII converter, sample images)
+- **Outputs**: Sample analysis results and ASCII art outputs
+
+See [`archive/README.md`](archive/README.md) for detailed information about archived files.
 
 ## Future Enhancements
 
@@ -210,4 +230,4 @@ The implementation is now production-ready but could be enhanced further with:
 
 ## License
 
-This implementation is based on the agent specification provided in `agent.md`.
+This implementation is based on the agent specification provided in [`archive/docs/agent.md`](archive/docs/agent.md).
