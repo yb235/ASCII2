@@ -82,6 +82,24 @@ print(prompts['level1'])  # Core concept
 print(prompts['level4'])  # Master blueprint
 ```
 
+### Command Line Interface
+
+Use the CLI for easy analysis:
+
+```bash
+# Full analysis
+python cli.py path/to/your/image.jpg
+
+# Show only specific prompt level
+python cli.py image.jpg --level 4
+
+# Show only specific analysis step
+python cli.py image.jpg --step 1 --verbose
+
+# JSON output for programmatic use
+python cli.py image.jpg --json
+```
+
 ### Demo Script
 
 Run the included demo script:
