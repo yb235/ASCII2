@@ -8,6 +8,7 @@ and generate progressive prompts following the specification in agent.md
 
 import os
 import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 from visual_analysis_agent import VisualAnalysisAgent
 from PIL import Image, ImageDraw
 

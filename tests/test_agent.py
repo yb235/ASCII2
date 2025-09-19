@@ -4,6 +4,8 @@ Simple test script to verify the Visual Analysis Agent implementation
 """
 
 import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 from visual_analysis_agent import VisualAnalysisAgent, ImageMetadata, ColorPalette, LightingAnalysis
 from PIL import Image, ImageDraw
 
