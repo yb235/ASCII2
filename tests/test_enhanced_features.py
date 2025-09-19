@@ -6,6 +6,7 @@ Test script for enhanced visual analysis features including ASCII art conversion
 import os
 import sys
 import time
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 from PIL import Image, ImageDraw
 from ascii_converter import ASCIIConverter, create_enhanced_ascii_converter
 from enhanced_visual_agent import EnhancedVisualAnalysisAgent
@@ -89,7 +90,9 @@ def test_real_image_processing():
     """Test processing with the actual JPG file"""
     print("Testing Real Image Processing...")
     
-    image_path = 'WIN_20250919_19_52_29_Pro.jpg'
+    # Look for image in examples directory
+    script_dir = os.path.dirname(__file__)
+    image_path = os.path.join(script_dir, '..', 'examples', 'WIN_20250919_19_52_29_Pro.jpg')
     
     if not os.path.exists(image_path):
         print(f"❌ Test image not found: {image_path}")
